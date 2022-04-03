@@ -9,7 +9,7 @@ import {
   ModalHeader,
   ModalOverlay
 } from "@chakra-ui/react";
-import {IoCreateOutline} from "react-icons/all";
+import {IoCreateOutline} from "react-icons/io5";
 
 interface NewTaskModalProps {
   isOpen: boolean;

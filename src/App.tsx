@@ -4,7 +4,9 @@ import "./App.css";
 import {HStack, VStack, Text, Box, Button, useDisclosure, useToast} from "@chakra-ui/react";
 import {DragDropContext, Draggable, Droppable} from "react-beautiful-dnd";
 import {useStore} from "./useStore";
-import {FaGithub, FaInstagram, FaLinkedin, MdAddCircle, SiChakraui} from "react-icons/all";
+import {FaGithub, FaInstagram, FaLinkedin} from "react-icons/fa";
+import {SiChakraui} from "react-icons/si";
+import {MdAddCircle} from "react-icons/md";
 import {Entity, Task} from "./interfaces";
 import NewTaskModal from "./components/NewTaskModal";
 import {entities} from "./constants";
@@ -36,12 +38,12 @@ const App = () => {
     setNewTaskValue("");
     onCloseNewTaskModal();
     successAddNewTaskToast({
-      title: 'New Task Successfully Added',
-      status: 'success',
+      title: "New Task Successfully Added",
+      status: "success",
       duration: 2000,
-      position: 'bottom',
+      position: "bottom",
       isClosable: true
-    })
+    });
   }, [newTaskValue]);
 
   const onDragEnd = useCallback((result) => {
@@ -65,8 +67,8 @@ const App = () => {
   }, [mainTask]);
 
   const handleOpenNewTab = useCallback((url: string) => {
-    window.open(url, '_blank');
-  },[])
+    window.open(url, "_blank");
+  }, []);
 
   const renderTitleSection = useCallback((title: string) => {
     return (
@@ -175,13 +177,13 @@ const App = () => {
             <FaLinkedin size="30px"
                         color="#0e76a8"
                         className="social-media-icon"
-                        onClick={() => handleOpenNewTab('https://www.linkedin.com/in/rully-saputra-7554a7138/')}/>
+                        onClick={() => handleOpenNewTab("https://www.linkedin.com/in/rully-saputra-7554a7138/")}/>
             <FaInstagram size="30px"
                          className="social-media-icon"
-                         onClick={() => handleOpenNewTab('https://www.instagram.com/rully.saputra15/')}/>
+                         onClick={() => handleOpenNewTab("https://www.instagram.com/rully.saputra15/")}/>
             <FaGithub size="30px"
                       className="social-media-icon"
-                      onClick={() => handleOpenNewTab('https://github.com/rully-saputra15')}/>
+                      onClick={() => handleOpenNewTab("https://github.com/rully-saputra15")}/>
           </HStack>
         </VStack>
       </VStack>
