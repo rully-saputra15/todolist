@@ -11,6 +11,7 @@
     "@chakra-ui/react": "1.8.7",
     "@emotion/react": "11",
     "@emotion/styled": "11",
+    "@fontsource/inter": "^4.5.7",
     "@types/react-beautiful-dnd": "13.1.2",
     "@types/uuid": "8.3.4",
     "framer-motion": "6",

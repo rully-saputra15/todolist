@@ -80,7 +80,7 @@ const App = () => {
               alignItems="center"
               rounded="2xl"
               boxShadow="md">
-        <Text fontWeight={700}>{title}</Text>
+        <Text fontSize="lg" fontWeight={700} noOfLines={2}>{title}</Text>
         {
           title === "Tasks" && (
             <Button leftIcon={<MdAddCircle/>}
@@ -97,7 +97,7 @@ const App = () => {
 
   const renderTodoListSection = (entity: Entity, data: Task[]) => {
     return (
-      <VStack alignItems="center" w="22%" h="2xl">
+      <VStack alignItems="center" w="md" h="2xl">
         {renderTitleSection(entity.title)}
         <Droppable droppableId={entity.id} type="tasks">
           {(providedDroppable, snapshot) => {
@@ -150,7 +150,7 @@ const App = () => {
   };
   return (
     <>
-      <VStack mx={10} spacing={6} h="full">
+      <VStack mx={10} spacing={6} justifyContent="flex-start">
         <Text bgGradient="linear(to-l, #4CCAFF, #3CBD96)"
               bgClip="text"
               fontSize="6xl"
@@ -158,7 +158,7 @@ const App = () => {
           Todo List
         </Text>
         <DragDropContext onDragEnd={onDragEnd}>
-          <HStack justifyContent="space-around" w="100%" alignItems="flex-start" maxHeight="3xl">
+          <HStack justifyContent="space-around" w="100%" alignItems="flex-start" flexWrap="wrap">
             {renderTodoListSection(entities[0], mainTask.tasks)}
             {renderTodoListSection(entities[1], mainTask.inProgress)}
             {renderTodoListSection(entities[2], mainTask.done)}
