@@ -1,28 +1,54 @@
 import {useCallback, useState} from "react";
 import {v4 as uuidv4} from "uuid";
 import "./App.css";
-import {HStack, VStack, Text, Box, Button, useDisclosure, useToast} from "@chakra-ui/react";
-import {DragDropContext, Draggable, Droppable} from "react-beautiful-dnd";
+import {Button, HStack, Text, useDisclosure, useToast, VStack} from "@chakra-ui/react";
+import {DragDropContext} from "react-beautiful-dnd";
 import {useStore} from "./useStore";
-import {FaGithub, FaInstagram, FaLinkedin} from "react-icons/fa";
-import {SiChakraui} from "react-icons/si";
 import {MdAddCircle} from "react-icons/md";
-import {Entity, Task} from "./interfaces";
 import NewTaskModal from "./components/NewTaskModal";
 import {entities} from "./constants";
+import FooterComponent from "./components/FooterComponent";
+import TodoListComponent from "./components/TodoListComponent";
+import EditTaskModal from "./components/EditTaskModal";
+import {EditTaskModalData} from "./interfaces";
+
 
 const App = () => {
-  const [mainTask, addTask, moveTask] =
-    useStore(s => [s.mainTask, s.addTask, s.moveTask]);
+  const initialState = {
+    editTaskModalData: {
+      taskId: "",
+      entityId: "",
+      taskValue: ""
+    }
+  };
+  const [mainTask, addTask, moveTask, editTask] =
+    useStore(s => [s.mainTask, s.addTask, s.moveTask, s.editTask]);
 
   const [newTaskValue, setNewTaskValue] = useState("");
+  const [editTaskModalData, setEditTaskModalData] = useState<EditTaskModalData>(initialState.editTaskModalData);
+  const successToast = useToast();
 
-  const successAddNewTaskToast = useToast();
+  const handleShowToast = useCallback((message: string) => {
+    successToast({
+      title: message,
+      status: "success",
+      duration: 2000,
+      position: "bottom",
+      isClosable: true
+    });
+  },[successToast])
 
   const {
     isOpen: isOpenNewTaskModal,
     onOpen,
     onClose: onCloseNewTaskModal
+  }
+    = useDisclosure();
+
+  const {
+    isOpen: isOpenEditTaskModal,
+    onOpen: onOpenEditTaskModal,
+    onClose: onCloseEditTaskModal
   }
     = useDisclosure();
 
@@ -37,14 +63,38 @@ const App = () => {
     });
     setNewTaskValue("");
     onCloseNewTaskModal();
-    successAddNewTaskToast({
-      title: "New Task Successfully Added",
-      status: "success",
-      duration: 2000,
-      position: "bottom",
-      isClosable: true
+    handleShowToast("New Task Successfully Added");
+  }, [newTaskValue, handleShowToast]);
+
+  const handleOpenEditTaskModal = useCallback((taskId: string, entityId: string, taskValue: string) => {
+    setEditTaskModalData({
+      taskId: taskId,
+      entityId: entityId,
+      taskValue: taskValue
     });
-  }, [newTaskValue]);
+    onOpenEditTaskModal();
+  }, [onOpenEditTaskModal, setEditTaskModalData]);
+
+  const handleEditTaskModal = useCallback((titleTask: string) => {
+    setEditTaskModalData({
+      taskId: editTaskModalData.taskId,
+      taskValue: titleTask,
+      entityId: editTaskModalData.entityId
+    });
+  }, [newTaskValue, setEditTaskModalData, editTaskModalData]);
+
+  const handleUpdateTaskValue = useCallback(() => {
+    const updatedMainTask = { ...mainTask };
+    const updatedSpecificTaskLocation =
+      updatedMainTask[editTaskModalData.entityId].findIndex((task) => task.id === editTaskModalData.taskId);
+    if (updatedSpecificTaskLocation >= 0) {
+      updatedMainTask[editTaskModalData.entityId][updatedSpecificTaskLocation].title = editTaskModalData.taskValue;
+      editTask(updatedMainTask);
+    }
+    setEditTaskModalData(initialState.editTaskModalData);
+    onCloseEditTaskModal();
+    handleShowToast("Task Successfully Edited")
+  }, [mainTask, editTask, editTaskModalData, setEditTaskModalData, initialState.editTaskModalData, onCloseEditTaskModal]);
 
   const onDragEnd = useCallback((result) => {
     let updatedMainTask = { ...mainTask };
@@ -70,78 +120,10 @@ const App = () => {
     window.open(url, "_blank");
   }, []);
 
-  const renderTitleSection = useCallback((title: string) => {
-    return (
-      <HStack justifyContent="space-around"
-              w="100%"
-              border="2px"
-              borderColor="lightblue"
-              py={4}
-              alignItems="center"
-              rounded="2xl"
-              boxShadow="md">
-        <Text fontSize="lg" fontWeight={700} noOfLines={2}>{title}</Text>
-      </HStack>
-    );
-  }, []);
-
-  const renderTodoListSection = (entity: Entity, data: Task[]) => {
-    return (
-      <VStack alignItems="center" w="md" h={["lg","2xl"]}>
-        {renderTitleSection(entity.title)}
-        <Droppable droppableId={entity.id} type="tasks">
-          {(providedDroppable, snapshot) => {
-            return (
-              <Box ref={providedDroppable.innerRef}
-                   {...providedDroppable.droppableProps}
-                   boxShadow="md"
-                   w="100%"
-                   minH={24}
-
-                   overflowY="scroll"
-                   sx={{
-                     "&::-webkit-scrollbar": {
-                       display: "none"
-                     }
-                   }}
-                   borderWidth="1px"
-                   borderColor="gray.300"
-                   borderRadius="2xl"
-                   p={4}
-              >
-                {
-                  data?.map((task, index) => {
-                    return (
-                      <Draggable key={task.id} draggableId={task.id} index={index}>
-                        {(providedDraggable, snapshot) => {
-                          return (
-                            <Box p={4}
-                                 mb={2}
-                                 bg={entity.color}
-                                 borderRadius={15}
-                                 {...providedDraggable.draggableProps}
-                                 {...providedDraggable.dragHandleProps}
-                                 ref={providedDraggable.innerRef}>
-                              <Text>{task.title}</Text>
-                            </Box>
-                          );
-                        }}
-                      </Draggable>
-                    );
-                  })
-                }
-                {providedDroppable.placeholder}
-              </Box>
-            );
-          }}
-        </Droppable>
-      </VStack>
-    );
-  };
   return (
     <>
       <VStack mx={10} justifyContent="space-between">
-        <Text bgGradient="linear(to-l, #4CCAFF, #3CBD96)"
+        <Text bgGradient="linear(to-l, #667eea, #764ba2)"
               bgClip="text"
               fontSize="6xl"
               fontWeight="extrabold">
@@ -155,40 +137,30 @@ const App = () => {
         </Button>
         <DragDropContext onDragEnd={onDragEnd}>
           <HStack justifyContent="space-around" w="100%" alignItems="flex-start" flexWrap="wrap">
-            {renderTodoListSection(entities[0], mainTask.tasks)}
-            {renderTodoListSection(entities[1], mainTask.inProgress)}
-            {renderTodoListSection(entities[2], mainTask.done)}
+            <TodoListComponent entity={entities[0]}
+                               data={mainTask.tasks}
+                               handleOpenEditTaskModal={handleOpenEditTaskModal}/>
+            <TodoListComponent entity={entities[1]}
+                               data={mainTask.inProgress}
+                               handleOpenEditTaskModal={handleOpenEditTaskModal}/>
+            <TodoListComponent entity={entities[2]}
+                               data={mainTask.done}
+                               handleOpenEditTaskModal={handleOpenEditTaskModal}/>
           </HStack>
         </DragDropContext>
-        <VStack alignItems="center" justifyContent="flex-start" spacing={4}>
-          <HStack justifyContent="flex-start">
-            <Text fontWeight={200}>Created by</Text>
-            <Text fontWeight={700}>Rully Saputra</Text>
-          </HStack>
-          <HStack>
-            <Text fontWeight={700}>Powered By Chakra UI</Text>
-            <SiChakraui size="25px" color="#2ABFB3"/>
-          </HStack>
-          <HStack>
-            <FaLinkedin size="30px"
-                        color="#0e76a8"
-                        className="social-media-icon"
-                        onClick={() => handleOpenNewTab("https://www.linkedin.com/in/rully-saputra-7554a7138/")}/>
-            <FaInstagram size="30px"
-                         className="social-media-icon"
-                         onClick={() => handleOpenNewTab("https://www.instagram.com/rully.saputra15/")}/>
-            <FaGithub size="30px"
-                      className="social-media-icon"
-                      onClick={() => handleOpenNewTab("https://github.com/rully-saputra15")}/>
-          </HStack>
-        </VStack>
+        <FooterComponent handleOpenNewTab={handleOpenNewTab}/>
       </VStack>
       <NewTaskModal isOpen={isOpenNewTaskModal}
                     onClose={onCloseNewTaskModal}
                     newTaskValue={newTaskValue}
                     handleAddNewTask={handleAddNewTask}
                     handleChangeNewTaskValue={handleChangeNewTaskValue}/>
-
+      <EditTaskModal isOpen={isOpenEditTaskModal}
+                     onClose={onCloseEditTaskModal}
+                     editTaskModalData={editTaskModalData}
+                     handleChangeNewTaskValue={handleEditTaskModal}
+                     handleUpdateTaskValue={handleUpdateTaskValue}
+      />
     </>
   );
 };

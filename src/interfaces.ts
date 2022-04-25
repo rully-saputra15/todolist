@@ -14,3 +14,9 @@ export interface Entity {
   title: string;
   color: string;
 }
+
+export interface EditTaskModalData {
+  taskId: string;
+  entityId: string;
+  taskValue: string;
+}
