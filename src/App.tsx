@@ -21,8 +21,8 @@ const App = () => {
       taskValue: ""
     }
   };
-  const [mainTask, addTask, moveTask, editTask] =
-    useStore(s => [s.mainTask, s.addTask, s.moveTask, s.editTask]);
+  const [mainTask, addTask, updateTask] =
+    useStore(s => [s.mainTask, s.addTask, s.updateTask]);
 
   const [newTaskValue, setNewTaskValue] = useState("");
   const [editTaskModalData, setEditTaskModalData] = useState<EditTaskModalData>(initialState.editTaskModalData);
@@ -36,7 +36,7 @@ const App = () => {
       position: "bottom",
       isClosable: true
     });
-  },[successToast])
+  }, [successToast]);
 
   const {
     isOpen: isOpenNewTaskModal,
@@ -89,12 +89,24 @@ const App = () => {
       updatedMainTask[editTaskModalData.entityId].findIndex((task) => task.id === editTaskModalData.taskId);
     if (updatedSpecificTaskLocation >= 0) {
       updatedMainTask[editTaskModalData.entityId][updatedSpecificTaskLocation].title = editTaskModalData.taskValue;
-      editTask(updatedMainTask);
+      updateTask(updatedMainTask);
     }
     setEditTaskModalData(initialState.editTaskModalData);
     onCloseEditTaskModal();
-    handleShowToast("Task Successfully Edited")
-  }, [mainTask, editTask, editTaskModalData, setEditTaskModalData, initialState.editTaskModalData, onCloseEditTaskModal]);
+    handleShowToast("Task Successfully Edited");
+  }, [mainTask, updateTask, editTaskModalData, setEditTaskModalData, initialState.editTaskModalData, onCloseEditTaskModal]);
+
+  const handleDeleteTask = useCallback((taskId: string, entityId: string) => {
+    const updatedMainTask = { ...mainTask };
+    const specificTaskLocation = updatedMainTask[entityId].findIndex((task) => task.id === taskId);
+    if (specificTaskLocation >= 0) {
+      updatedMainTask[entityId] = [
+        ...updatedMainTask[entityId].slice(0, specificTaskLocation),
+        ...updatedMainTask[entityId].slice(specificTaskLocation + 1)
+      ];
+      updateTask(updatedMainTask);
+    }
+  }, [mainTask, updateTask]);
 
   const onDragEnd = useCallback((result) => {
     let updatedMainTask = { ...mainTask };
@@ -112,9 +124,9 @@ const App = () => {
           ...updatedMainTask[sourceId].slice(sourceTaskId + 1)
         ]
       };
-      moveTask(updatedMainTask);
+      updateTask(updatedMainTask);
     }
-  }, [mainTask]);
+  }, [mainTask, updateTask]);
 
   const handleOpenNewTab = useCallback((url: string) => {
     window.open(url, "_blank");
@@ -136,15 +148,24 @@ const App = () => {
           Add New Task
         </Button>
         <DragDropContext onDragEnd={onDragEnd}>
-          <HStack justifyContent="space-around" w="100%" alignItems="flex-start" flexWrap="wrap">
+          <HStack justifyContent="space-around"
+                  w="100%"
+                  alignItems="flex-start"
+                  flexWrap="wrap">
             <TodoListComponent entity={entities[0]}
                                data={mainTask.tasks}
+                               animationOffsetY="100px"
+                               handleDeleteTask={handleDeleteTask}
                                handleOpenEditTaskModal={handleOpenEditTaskModal}/>
             <TodoListComponent entity={entities[1]}
                                data={mainTask.inProgress}
+                               animationOffsetY="200px"
+                               handleDeleteTask={handleDeleteTask}
                                handleOpenEditTaskModal={handleOpenEditTaskModal}/>
             <TodoListComponent entity={entities[2]}
                                data={mainTask.done}
+                               animationOffsetY="300px"
+                               handleDeleteTask={handleDeleteTask}
                                handleOpenEditTaskModal={handleOpenEditTaskModal}/>
           </HStack>
         </DragDropContext>

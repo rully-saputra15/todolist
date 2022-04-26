@@ -4,8 +4,7 @@ import {MainTask, Task} from "./interfaces";
 interface Store {
   mainTask: MainTask;
   addTask: (task: Task) => void;
-  moveTask: (updatedMainTask: MainTask) => void;
-  editTask: (updatedMainTask: MainTask) => void;
+  updateTask: (updatedMainTask: MainTask) => void;
   // setTasks: () => void;
   // setInProgress: () => void;
   // setDone: () => void;
@@ -23,14 +22,9 @@ export const useStore = create<Store>(set => ({
       tasks: [...state.mainTask["tasks"], task]
     }
   })),
-  moveTask: (updatedMainTask: MainTask) => set(
+  updateTask: (updatedMainTask: MainTask) => set(
     {
       mainTask: updatedMainTask
     }
   ),
-  editTask: (updatedMainTask: MainTask) => set(
-    {
-      mainTask: updatedMainTask
-    }
-  )
 }));
