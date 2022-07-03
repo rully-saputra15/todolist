@@ -1,7 +1,7 @@
-import {useCallback, useState} from "react";
+import {useCallback, useEffect, useState} from "react";
 import {v4 as uuidv4} from "uuid";
 import "./App.css";
-import {Button, HStack, Text, useDisclosure, useToast, VStack} from "@chakra-ui/react";
+import {Badge, Button, HStack, Text, useDisclosure, useToast, VStack} from "@chakra-ui/react";
 import {DragDropContext} from "react-beautiful-dnd";
 import {useStore} from "./useStore";
 import {MdAddCircle} from "react-icons/md";
@@ -11,6 +11,7 @@ import FooterComponent from "./components/FooterComponent";
 import TodoListComponent from "./components/TodoListComponent";
 import EditTaskModal from "./components/EditTaskModal";
 import {EditTaskModalData} from "./interfaces";
+import moment from "moment";
 
 
 const App = () => {
@@ -25,8 +26,13 @@ const App = () => {
     useStore(s => [s.mainTask, s.addTask, s.updateTask]);
 
   const [newTaskValue, setNewTaskValue] = useState("");
+  const [nowTime, setNowTime] = useState(moment().format('LTS'));
   const [editTaskModalData, setEditTaskModalData] = useState<EditTaskModalData>(initialState.editTaskModalData);
   const successToast = useToast();
+
+  useEffect(() => {
+    setInterval(() => setNowTime(moment().format('LTS')),1000);
+  },[])
 
   const handleShowToast = useCallback((message: string) => {
     successToast({
@@ -171,6 +177,14 @@ const App = () => {
         </DragDropContext>
         <FooterComponent handleOpenNewTab={handleOpenNewTab}/>
       </VStack>
+      <Badge pos="absolute"
+             fontSize="1.2em"
+             variant="solid"
+             top="1"
+             right="1"
+             colorScheme="blue">
+        {nowTime}
+      </Badge>
       <NewTaskModal isOpen={isOpenNewTaskModal}
                     onClose={onCloseNewTaskModal}
                     newTaskValue={newTaskValue}
