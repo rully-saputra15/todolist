@@ -24,7 +24,7 @@ const TodoListComponent: FC<TodoListComponentProps> = (
 ) => {
   return (
     <SlideFade in={true} offsetY={animationOffsetY}>
-      <VStack alignItems="center" w="md" h="lg">
+      <VStack alignItems="center" w="sm" h="lg">
         <TitleSection title={entity.title}/>
         <Droppable droppableId={entity.id} type="tasks">
           {(providedDroppable, snapshot) => {

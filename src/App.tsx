@@ -13,7 +13,6 @@ import EditTaskModal from "./components/EditTaskModal";
 import {EditTaskModalData} from "./interfaces";
 import moment from "moment";
 
-
 const App = () => {
   const initialState = {
     editTaskModalData: {
@@ -28,6 +27,8 @@ const App = () => {
   const [newTaskValue, setNewTaskValue] = useState("");
   const [nowTime, setNowTime] = useState(moment().format('LTS'));
   const [editTaskModalData, setEditTaskModalData] = useState<EditTaskModalData>(initialState.editTaskModalData);
+  const [isTitleTaskFilled, setIsTitleTaskFilled] = useState(false);
+  const [isTitleTaskUpdated, setIsTitleTaskUpdated] = useState(false);
   const successToast = useToast();
 
   useEffect(() => {
@@ -59,6 +60,7 @@ const App = () => {
     = useDisclosure();
 
   const handleChangeNewTaskValue = useCallback((titleTask: string) => {
+    setIsTitleTaskFilled(titleTask !== '');
     setNewTaskValue(titleTask);
   }, [newTaskValue]);
 
@@ -68,6 +70,7 @@ const App = () => {
       title: newTaskValue
     });
     setNewTaskValue("");
+    setIsTitleTaskFilled(false);
     onCloseNewTaskModal();
     handleShowToast("New Task Successfully Added");
   }, [newTaskValue, handleShowToast]);
@@ -82,12 +85,16 @@ const App = () => {
   }, [onOpenEditTaskModal, setEditTaskModalData]);
 
   const handleEditTaskModal = useCallback((titleTask: string) => {
+    const mainTaskSearchedLocation = mainTask[editTaskModalData.entityId]
+      .findIndex((task) => task.id === editTaskModalData.taskId);
+    const selectedTitleTask = mainTask[editTaskModalData.entityId][mainTaskSearchedLocation].title;
+    setIsTitleTaskUpdated(selectedTitleTask !== titleTask)
     setEditTaskModalData({
       taskId: editTaskModalData.taskId,
       taskValue: titleTask,
       entityId: editTaskModalData.entityId
     });
-  }, [newTaskValue, setEditTaskModalData, editTaskModalData]);
+  }, [mainTask, newTaskValue, setEditTaskModalData, editTaskModalData]);
 
   const handleUpdateTaskValue = useCallback(() => {
     const updatedMainTask = { ...mainTask };
@@ -140,41 +147,43 @@ const App = () => {
 
   return (
     <>
-      <VStack mx={10} justifyContent="space-between">
-        <Text bgGradient="linear(to-l, #667eea, #764ba2)"
-              bgClip="text"
-              fontSize="6xl"
-              fontWeight="extrabold">
-          Todo List
-        </Text>
-        <Button leftIcon={<MdAddCircle/>}
-                onClick={onOpen}
-                colorScheme="blue"
-                variant="outline" size="md">
-          Add New Task
-        </Button>
-        <DragDropContext onDragEnd={onDragEnd}>
-          <HStack justifyContent="space-around"
-                  w="100%"
-                  alignItems="flex-start"
-                  flexWrap="wrap">
-            <TodoListComponent entity={entities[0]}
-                               data={mainTask.tasks}
-                               animationOffsetY="100px"
-                               handleDeleteTask={handleDeleteTask}
-                               handleOpenEditTaskModal={handleOpenEditTaskModal}/>
-            <TodoListComponent entity={entities[1]}
-                               data={mainTask.inProgress}
-                               animationOffsetY="200px"
-                               handleDeleteTask={handleDeleteTask}
-                               handleOpenEditTaskModal={handleOpenEditTaskModal}/>
-            <TodoListComponent entity={entities[2]}
-                               data={mainTask.done}
-                               animationOffsetY="300px"
-                               handleDeleteTask={handleDeleteTask}
-                               handleOpenEditTaskModal={handleOpenEditTaskModal}/>
-          </HStack>
-        </DragDropContext>
+      <VStack mx={10} justifyContent="space-between" h="100vh">
+        <VStack w="100%">
+          <Text bgGradient="linear(to-l, #667eea, #764ba2)"
+                bgClip="text"
+                fontSize="6xl"
+                fontWeight="extrabold">
+            Todo List
+          </Text>
+          <Button leftIcon={<MdAddCircle/>}
+                  onClick={onOpen}
+                  colorScheme="blue"
+                  variant="outline" size="md">
+            Add New Task
+          </Button>
+          <DragDropContext onDragEnd={onDragEnd}>
+            <HStack justifyContent="space-evenly"
+                    w="100%"
+                    alignItems="flex-start"
+                    flexWrap="wrap">
+              <TodoListComponent entity={entities[0]}
+                                 data={mainTask.tasks}
+                                 animationOffsetY="100px"
+                                 handleDeleteTask={handleDeleteTask}
+                                 handleOpenEditTaskModal={handleOpenEditTaskModal}/>
+              <TodoListComponent entity={entities[1]}
+                                 data={mainTask.inProgress}
+                                 animationOffsetY="200px"
+                                 handleDeleteTask={handleDeleteTask}
+                                 handleOpenEditTaskModal={handleOpenEditTaskModal}/>
+              <TodoListComponent entity={entities[2]}
+                                 data={mainTask.done}
+                                 animationOffsetY="300px"
+                                 handleDeleteTask={handleDeleteTask}
+                                 handleOpenEditTaskModal={handleOpenEditTaskModal}/>
+            </HStack>
+          </DragDropContext>
+        </VStack>
         <FooterComponent handleOpenNewTab={handleOpenNewTab}/>
       </VStack>
       <Badge pos="absolute"
@@ -188,9 +197,11 @@ const App = () => {
       <NewTaskModal isOpen={isOpenNewTaskModal}
                     onClose={onCloseNewTaskModal}
                     newTaskValue={newTaskValue}
+                    isTitleTaskFilled={isTitleTaskFilled}
                     handleAddNewTask={handleAddNewTask}
                     handleChangeNewTaskValue={handleChangeNewTaskValue}/>
       <EditTaskModal isOpen={isOpenEditTaskModal}
+                     isTitleTaskUpdated={isTitleTaskUpdated}
                      onClose={onCloseEditTaskModal}
                      editTaskModalData={editTaskModalData}
                      handleChangeNewTaskValue={handleEditTaskModal}

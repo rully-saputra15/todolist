@@ -9,7 +9,7 @@ interface FooterComponentProps {
 
 const FooterComponent: FC<FooterComponentProps> = ({ handleOpenNewTab }) => {
   return (
-    <VStack alignItems="center" justifyContent="flex-start" spacing={4} pos="absolute" bottom={1}>
+    <VStack alignItems="center" justifyContent="flex-start" spacing={4}>
       <HStack justifyContent="flex-start">
         <Text fontWeight={200}>Created by</Text>
         <Text fontWeight={700}>Rully Saputra</Text>

@@ -1,6 +1,6 @@
 import {FC} from "react";
 import {
-  Button, FormControl, FormLabel, Input,
+  Button, FormControl, FormErrorMessage, FormLabel, Input,
   Modal,
   ModalBody,
   ModalCloseButton,
@@ -13,6 +13,7 @@ import {IoCreateOutline} from "react-icons/io5";
 
 interface NewTaskModalProps {
   isOpen: boolean;
+  isTitleTaskFilled: boolean;
   onClose: () => void;
   newTaskValue: string;
   handleAddNewTask: () => void;
@@ -22,6 +23,7 @@ interface NewTaskModalProps {
 const NewTaskModal: FC<NewTaskModalProps> = (
   {
     isOpen,
+    isTitleTaskFilled,
     onClose,
     newTaskValue,
     handleAddNewTask,
@@ -39,12 +41,19 @@ const NewTaskModal: FC<NewTaskModalProps> = (
             <FormLabel>Title</FormLabel>
             <Input placeholder='ex: 5 mins read book'
                    value={newTaskValue}
+                   required
                    onChange={(ev) => handleChangeNewTaskValue(ev.currentTarget.value)}
             />
+            {
+              !isTitleTaskFilled && (
+                <FormErrorMessage>Task title is required.</FormErrorMessage>
+              )
+            }
           </FormControl>
         </ModalBody>
         <ModalFooter>
           <Button colorScheme='blue'
+                  disabled={!isTitleTaskFilled}
                   rightIcon={<IoCreateOutline/>}
                   onClick={handleAddNewTask}>
             Create

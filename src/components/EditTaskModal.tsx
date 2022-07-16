@@ -15,6 +15,7 @@ import {EditTaskModalData} from "../interfaces";
 
 interface EditTaskModalProps {
   isOpen: boolean;
+  isTitleTaskUpdated: boolean;
   onClose: () => void;
   editTaskModalData: EditTaskModalData;
   handleChangeNewTaskValue: (titleTask: string) => void;
@@ -24,6 +25,7 @@ interface EditTaskModalProps {
 const EditTaskModal: FC<EditTaskModalProps> = (
   {
     isOpen,
+    isTitleTaskUpdated,
     onClose,
     editTaskModalData,
     handleChangeNewTaskValue,
@@ -47,6 +49,7 @@ const EditTaskModal: FC<EditTaskModalProps> = (
         </ModalBody>
         <ModalFooter>
           <Button colorScheme="blue"
+                  disabled={!isTitleTaskUpdated}
                   rightIcon={<IoCreateOutline/>}
                   onClick={handleUpdateTaskValue}>
             Oke

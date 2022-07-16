@@ -1,5 +1,6 @@
 import create from "zustand";
 import {MainTask, Task} from "./interfaces";
+import {persist} from "zustand/middleware";
 
 interface Store {
   mainTask: MainTask;
@@ -10,21 +11,25 @@ interface Store {
   // setDone: () => void;
 }
 
-export const useStore = create<Store>(set => ({
-  mainTask: {
-    tasks: [],
-    inProgress: [],
-    done: []
-  },
-  addTask: (task: Task) => set(state => ({
-    mainTask: {
-      ...state.mainTask,
-      tasks: [...state.mainTask["tasks"], task]
-    }
-  })),
-  updateTask: (updatedMainTask: MainTask) => set(
+export const useStore = create<Store>(persist((set, get) => ({
+      mainTask: {
+        tasks: [],
+        inProgress: [],
+        done: []
+      },
+      addTask: (task: Task) => set(state => ({
+        mainTask: {
+          ...state.mainTask,
+          tasks: [...state.mainTask["tasks"], task]
+        }
+      })),
+      updateTask: (updatedMainTask: MainTask) => set(
+        {
+          mainTask: updatedMainTask
+        }
+      )
+    }),
     {
-      mainTask: updatedMainTask
-    }
-  ),
-}));
+      name: "todolist"
+    })
+);
